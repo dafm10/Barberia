@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Prototipo de reservas de citas de la barbería La Navaja.">
+    <title>La Navaja | Reserva tu cita</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/api.js" defer></script>
+    <script src="js/formularios.js" defer></script>
+    <script src="js/horas.js" defer></script>
+    <script src="js/app.js" defer></script>
+</head>
+<body>
+    <div id="barber-prototype">
+
+<header class="top">
+<div class="header-left">
+<div class="brand">
+<span class="seal">
+<span aria-hidden="true">✂</span>
+</span>
+<span>LA NAVAJA<small>BARBERÍA · LIMA</small>
+</span>
+</div>
+<div id="bp-user" class="user-info" hidden aria-label="Usuario conectado">
+    <span id="bp-user-name" class="user-name"></span>
+    <span id="bp-user-role" class="user-role"></span>
+</div>
+</div>
+<nav class="navigation" aria-label="Vista del prototipo">
+<button type="button" class="active" data-view="reserve">Reservar cita</button>
+<button type="button" data-view="admin">Administración</button>
+<button type="button" id="bp-openlogin">Iniciar sesión</button>
+<button type="button" id="bp-openregister">Crear cuenta</button>
+<button type="button" id="bp-logout" hidden>Cerrar sesión</button>
+</nav>
+</header>
+<section id="bp-login" hidden class="admin" style="padding-top:32px">
+<div class="eyebrow">Gestión de reservas</div><h1>Bienvenido a La Navaja.</h1>
+<p class="note">Ingresa con tu cuenta de cliente, barbero o administrador.</p>
+<p id="bp-auth-success" class="note" role="status" hidden></p>
+<form novalidate id="bp-login-form" style="max-width:420px;margin-top:24px">
+<div class="field"><label for="bp-login-email">Correo</label><input id="bp-login-email" name="correo" type="email" autocomplete="username" required></div>
+<div class="field"><label for="bp-login-password">Contraseña</label><input id="bp-login-password" name="password" type="password" autocomplete="current-password" required></div>
+<button type="submit" class="primary" id="bp-login-submit">Ingresar</button>
+<p id="bp-login-error" class="error" role="alert" hidden></p>
+</form>
+<p class="note">¿Todavía no tienes cuenta? <button type="button" id="bp-login-register" class="compact">Regístrate aquí</button></p>
+</section>
+<section id="bp-register" hidden class="admin" style="padding-top:32px">
+    <div class="eyebrow">Tu próxima visita comienza aquí</div>
+    <h1>Crea tu cuenta.</h1>
+    <p class="note">Reserva tus servicios y consulta tus citas desde tu cuenta de cliente.</p>
+    <form novalidate id="bp-register-form" style="max-width:600px;margin-top:24px">
+        <div class="field">
+            <label for="bp-register-name">Nombre completo</label>
+            <input id="bp-register-name" name="nombre" autocomplete="name" maxlength="150" required>
+        </div>
+        <div class="twocol">
+            <div class="field">
+                <label for="bp-register-email">Correo electrónico</label>
+                <input id="bp-register-email" name="correo" type="email" autocomplete="email" maxlength="254" required>
+            </div>
+            <div class="field">
+                <label for="bp-register-phone">Celular</label>
+                <input id="bp-register-phone" name="telefono" type="tel" autocomplete="tel" inputmode="numeric" pattern="[0-9]{9}" maxlength="9" placeholder="987654321" aria-describedby="bp-register-phone-help" required>
+                <small id="bp-register-phone-help" class="muted">Ingresa 9 dígitos, sin espacios.</small>
+            </div>
+        </div>
+        <div class="field">
+            <label for="bp-register-sex">Sexo</label>
+            <select id="bp-register-sex" name="sexo" required>
+                <option value="">Selecciona una opción</option>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+                <option value="Otro">Otro</option>
+                <option value="No especificado">Prefiero no indicarlo</option>
+            </select>
+        </div>
+        <div class="twocol">
+            <div class="field">
+                <label for="bp-register-password">Contraseña</label>
+                <input id="bp-register-password" name="password" type="password" autocomplete="new-password" minlength="8" aria-describedby="bp-register-password-help" required>
+                <small id="bp-register-password-help" class="muted">Usa al menos 8 caracteres.</small>
+            </div>
+            <div class="field">
+                <label for="bp-register-confirm">Repite tu contraseña</label>
+                <input id="bp-register-confirm" name="confirmacion" type="password" autocomplete="new-password" minlength="8" required>
+            </div>
+        </div>
+        <p id="bp-register-error" class="error" role="alert" hidden></p>
+        <div class="actions">
+            <button type="button" id="bp-register-login">Ya tengo cuenta</button>
+            <button type="submit" class="primary" id="bp-register-submit">Crear mi cuenta</button>
+        </div>
+    </form>
+</section>
+<p id="bp-admin-success" class="note" role="status" style="padding:0 30px" hidden></p>
+<p id="bp-global-error" class="error" role="alert" style="padding:0 30px" hidden></p>
+<section id="bp-reserve">
+<div class="intro">
+<div>
+<div class="eyebrow">Tu tiempo. Tu estilo.</div>
+<h1>Un buen corte empieza<br>con una buena cita.</h1>
+<p class="muted">Elige tu servicio. Nosotros nos encargamos del detalle.</p>
+</div>
+<span class="tag">Elige tu servicio y reserva tu visita</span>
+</div>
+<div class="layout">
+<main>
+<div class="steps" aria-label="Pasos de reserva">
+<span class="step current" data-step="0">
+<b>1</b>Servicio</span>
+<span class="step" data-step="1">
+<b>2</b>Horario</span>
+<span class="step" data-step="2">
+<b>3</b>Tus datos</span>
+</div>
+<section data-screen="0">
+<div class="field">
+<label for="bp-sede">¿Dónde te esperamos?</label>
+<select id="bp-sede">
+<option value="0">Sede Miraflores · Av. Larco 520</option>
+<option value="1">Sede San Miguel · Av. La Marina 1850</option>
+</select>
+</div>
+<h2>Elige tu servicio</h2>
+<div class="choices" id="bp-services">
+</div>
+</section>
+<section data-screen="1" hidden>
+<h2>Encuentra tu momento</h2>
+<div class="twocol">
+<div class="field">
+<label for="bp-barber">Tu barbero</label>
+<select id="bp-barber">
+</select>
+</div>
+<div class="field">
+<label for="bp-date">Fecha de la cita</label>
+<input id="bp-date" type="date" required>
+</div>
+</div>
+<h2>Horas disponibles</h2>
+<div class="slots" id="bp-slots">
+</div>
+<p class="note">Hora de Lima · Los horarios atenuados están ocupados.</p>
+</section>
+<section data-screen="2" hidden>
+<h2>¿A nombre de quién reservamos?</h2>
+<div id="bp-guest-options" class="note" style="margin-bottom:20px">
+    <p>Puedes continuar como invitado con tus datos de contacto.</p>
+    <button type="button" id="bp-booking-login" class="compact">Ya tengo cuenta</button>
+    <button type="button" id="bp-booking-register" class="compact">Crear cuenta (opcional)</button>
+</div>
+<form novalidate id="bp-contact">
+<div class="field">
+<label for="bp-name">Nombre completo</label>
+<input id="bp-name" name="nombre" autocomplete="name" placeholder="Tu nombre y apellido" required maxlength="150">
+</div>
+<div class="twocol">
+<div class="field">
+<label for="bp-email">Correo electrónico</label>
+<input id="bp-email" name="correo" type="email" autocomplete="email" placeholder="nombre@correo.com" required maxlength="254">
+</div>
+<div class="field">
+<label for="bp-phone">Celular</label>
+<input id="bp-phone" name="telefono" type="tel" autocomplete="tel" inputmode="numeric" placeholder="987654321" pattern="[0-9]{9}" maxlength="9" required>
+</div>
+</div>
+<p id="bp-contact-note" class="note">Tu solicitud queda pendiente hasta que la barbería la confirme.</p>
+</form>
+</section>
+<p id="bp-error" class="error" role="alert" hidden>
+</p>
+<section id="bp-receipt" class="receipt" aria-live="polite" hidden>
+<div class="seal">
+<span aria-hidden="true">✓</span>
+</div>
+<h2>Tu solicitud está registrada.</h2>
+<p class="muted">Estamos preparando tu próxima visita.</p>
+<div class="code">Cita #<span id="bp-code">
+</span>
+</div>
+<p>
+<span class="badge" id="bp-receipt-status">Pendiente de confirmación</span>
+</p>
+<p class="note">Conserva este código para identificar tu reserva con la barbería.</p>
+<button type="button" id="bp-showagenda" style="margin-top:22px">Ver en la agenda</button>
+<button type="button" id="bp-new" style="margin-top:12px">Crear otra reserva</button>
+</section>
+<div class="actions" id="bp-actions">
+<button type="button" id="bp-back" hidden>Volver</button>
+<span id="bp-helper" class="muted">01 / 03</span>
+<button type="button" class="primary" id="bp-next">Elegir horario →</button>
+</div>
+</main>
+<aside class="summary" aria-label="Resumen de reserva">
+<div class="eyebrow">Nos vemos pronto</div>
+<h2>Tu próxima visita</h2>
+<dl>
+<dt>SEDE</dt>
+<dd id="bp-summary-sede">Miraflores</dd>
+<dt>SERVICIO</dt>
+<dd id="bp-summary-service">Corte clásico</dd>
+<dt>BARBERO</dt>
+<dd id="bp-summary-barber">Por elegir</dd>
+<dt>FECHA Y HORA</dt>
+<dd id="bp-summary-date">Por elegir</dd>
+</dl>
+<div class="total">
+<span>Total</span>
+<strong id="bp-total">S/ 35.00</strong>
+</div>
+<p class="note" id="bp-duration">30 minutos de atención</p>
+<hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+<p class="note">Llega 5 minutos antes para disfrutar de tu experiencia con calma.</p>
+</aside>
+</div>
+</section>
+<section id="bp-admin" hidden>
+<div class="intro">
+<div>
+<div class="eyebrow">Gestión de la barbería</div>
+<h1>Todo listo para atender.</h1>
+<p class="muted">Citas, equipo y disponibilidad en un solo lugar.</p>
+</div>
+</div>
+<div class="admin">
+<nav class="adminnav" aria-label="Secciones administrativas">
+<button type="button" class="active" data-admin="agenda">Agenda de citas</button>
+<button type="button" data-admin="availability">Horarios y bloqueos</button>
+<button type="button" data-admin="team">Barberos</button>
+<button type="button" data-admin="sedes">Sedes</button>
+<button type="button" data-admin="services">Servicios</button>
+<button type="button" data-admin="catalog">Precios</button>
+</nav>
+<div id="bp-admincontent" aria-live="polite">
+</div>
+</div>
+</section>
+<footer class="bottom">
+<span>LA NAVAJA · Barbería contemporánea</span>
+<span>Reservas conectadas a la barbería · Hora de Lima</span>
+</footer>
+
+    </div>
+</body>
+</html>
